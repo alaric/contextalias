@@ -6,22 +6,23 @@ if [[ ! -d $1 ]]; then
 fi
 
 CURR_WD=`pwd`
-TEST_DIR=`realpath $1`
+export TEST_DIR=`realpath $1`
 
 alias aliasa="echo 'a' >>$TEST_DIR/results.txt"
 source contextalias.zsh
 
 cd $1
-rm results.txt
+rm -f results.txt
 touch results.txt
 
 aliasa
 
 cd append_b
 aliasa
-cd ../append_c
+cd ../append_c/dummy
 aliasa
-cd ..
+cd ../..
+aliasa
 cd blank
 aliasa
 cd ..
@@ -30,9 +31,8 @@ aliasa
 aliasb
 cd ../..
 
-
 # Check the results
-diff results.txt expected.txt #2>&1 1>/dev/null
+diff -u results.txt expected.txt 2>&1 1>/dev/null
 if (( $? != 0 )); then
     echo "Bad result"
     exit 1
