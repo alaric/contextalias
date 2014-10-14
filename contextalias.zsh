@@ -12,16 +12,16 @@ CONTEXTALIASS_CURRENT_CONFIG=""
 debug "Current alias = $CONTEXTALIAS_ORIGINAL_ALIASES" 
 
 function contextalias_chpwd_function {
-    S="${PWD}"
-    debug "Starting chpwd function in $S"
+    CA_S="${PWD}"
+    debug "Starting chpwd function in $CA_S"
     localconfig=""
-    while [ -n "${S}" ]
+    while [ -n "${CA_S}" ]
     do
-        if [ -e "$S/$CONTEXTALIAS_CONFIG_NAME" ]; then
-            localconfig="$S/$CONTEXTALIAS_CONFIG_NAME"
+        if [ -e "$CA_S/$CONTEXTALIAS_CONFIG_NAME" ]; then
+            localconfig="$CA_S/$CONTEXTALIAS_CONFIG_NAME"
             break
         fi
-        S=${S%/*}
+        CA_S=${CA_S%/*}
     done
 
     if [[ "x$localconfig" != "x$CONTEXTALIASS_CURRENT_CONFIG" ]]; then
@@ -30,18 +30,16 @@ function contextalias_chpwd_function {
         current_aliases=`alias`
 
         for a in ${(@f)current_aliases}; do
-            aliasarr=(${(s:=:)a})
-            aliascmd=${aliasarr[1]}
+            aliascmd=${a%%=*}
             debug "Clearing current alias = '$aliascmd'"
-            builtin unalias $aliascmd
+            eval "builtin unalias -- '$aliascmd'"
         done
 
         for a in ${(@f)CONTEXTALIAS_ORIGINAL_ALIASES}; do
-            aliasarr=(${(s:=:)a})
-            aliascmd=${aliasarr[1]}
-            aliasval=${aliasarr[2]}
+            aliascmd=${a%%=*}
+            aliasval=${a#*=}
             debug "Setting alias command = '$aliascmd' value = '$aliasval'"
-            eval "builtin alias $aliascmd=$aliasval"
+            eval "builtin alias -- '$aliascmd'=$aliasval"
         done
 
         if [[ "x$localconfig" != "x" ]]; then
